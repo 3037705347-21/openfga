@@ -104,6 +104,8 @@ statement function.
 **`Column` is the easy one to get wrong.** It names a logical column, with no default stored
 column. If your table stores the subject as one `_user` string (`type:id` or `type:id#relation`),
 `ColSubjectID` means taking that string apart, not naming a column. Decide how you get every column.
+`ColSubjectKind` is `'userset'` when `SubjectRelation != "" || SubjectID == "*"` or `'user'`
+otherwise, so it cannot be derived from `ColSubjectRelation` alone.
 
 `CastType` has no boolean target and no length or precision. If your database needs a size, pick a
 maximum and document it.
