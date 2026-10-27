@@ -151,6 +151,13 @@ type MemoryBackend struct {
 	// map: store id | authz model id => assertions
 	assertions      map[string][]*openfgav1.Assertion // GUARDED_BY(mutexAssertions).
 	mutexAssertions sync.RWMutex
+
+	// ChangeConsumerBackend
+	// map: store => map: consumer name => durable consumer state.
+	// When both mutexTuples and mutexChangeConsumers are needed, mutexTuples
+	// is always acquired first.
+	changeConsumers      map[string]map[string]*memChangeConsumerState // GUARDED_BY(mutexChangeConsumers).
+	mutexChangeConsumers sync.RWMutex
 }
 
 // Ensures that [MemoryBackend] implements the [storage.OpenFGADatastore] interface.
@@ -173,6 +180,7 @@ func New(opts ...StorageOption) storage.OpenFGADatastore {
 		authorizationModels:           make(map[string]map[string]*AuthorizationModelEntry),
 		stores:                        make(map[string]*openfgav1.Store, 0),
 		assertions:                    make(map[string][]*openfgav1.Assertion, 0),
+		changeConsumers:               make(map[string]map[string]*memChangeConsumerState),
 	}
 
 	for _, opt := range opts {

@@ -53,6 +53,11 @@ func RunAllTests(t *testing.T, ds storage.OpenFGADatastore) {
 	// Identifier collation regression — locks in case-sensitive identifier
 	// comparison across all backends. See migration 008 (MySQL).
 	t.Run("TestIdentifierCaseSensitivity", func(t *testing.T) { IdentifierCaseSensitivityTest(t, ds) })
+
+	// Named change consumers are an optional backend capability.
+	if consumers, ok := ds.(changeConsumerDatastore); ok {
+		t.Run("TestChangeConsumers", func(t *testing.T) { RunChangeConsumerTests(t, consumers) })
+	}
 }
 
 // BootstrapFGAStore is a utility to write an FGA model and relationship tuples to a datastore.
