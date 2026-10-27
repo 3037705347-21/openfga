@@ -80,6 +80,36 @@ type ReadAuthorizationModelsOptions struct {
 	Pagination PaginationOptions
 }
 
+// ReadAuthorizationModelActivationsOptions represents the options that can be
+// used with the ReadAuthorizationModelActivations method.
+type ReadAuthorizationModelActivationsOptions struct {
+	Pagination PaginationOptions
+}
+
+// AuthorizationModelActivation is a single, immutable record in a store's
+// model activation ledger. The model referenced by the record having the
+// greatest ID (a monotonically ordered ULID) for a store is the store's
+// currently active authorization model.
+type AuthorizationModelActivation struct {
+	// ID is the ULID identifying this activation record. It also defines the
+	// total order of activations within a store.
+	ID string
+
+	// StoreID is the store in which the model was activated.
+	StoreID string
+
+	// AuthorizationModelID is the model that became active as a result of this
+	// activation.
+	AuthorizationModelID string
+
+	// PreviousAuthorizationModelID is the model that was active immediately
+	// before this activation. It is empty for the first activation of a store.
+	PreviousAuthorizationModelID string
+
+	// ActivatedAt is the time at which the activation occurred.
+	ActivatedAt time.Time
+}
+
 // ListStoresOptions represents the options that can
 // be used with the ListStores method.
 type ListStoresOptions struct {
@@ -339,9 +369,33 @@ type AuthorizationModelReadBackend interface {
 	// In addition to the models, it returns a continuation token that can be used to fetch the next page of results.
 	ReadAuthorizationModels(ctx context.Context, store string, options ReadAuthorizationModelsOptions) ([]*openfgav1.AuthorizationModel, string, error)
 
-	// FindLatestAuthorizationModel returns the last model for the store.
-	// If none were ever written, it must return ErrNotFound.
-	FindLatestAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error)
+	// FindActiveAuthorizationModel returns the currently active model for the store, i.e. the
+	// model targeted by the latest entry in the store's model activation ledger.
+	// Writing a model does not activate it; a model becomes active only through
+	// ModelActivationBackend.ActivateAuthorizationModel.
+	// If no model was ever activated for the store, it must return ErrNotFound.
+	FindActiveAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error)
+}
+
+// ModelActivationBackend provides explicit model activation and an append-only
+// activation ledger. The active model of a store is deterministically derived
+// as the target of the store's activation record with the greatest ID.
+type ModelActivationBackend interface {
+	// ActivateAuthorizationModel atomically activates the model identified by modelID for
+	// the given store and appends a new entry to the store's activation ledger.
+	// If the target model does not exist, it must return ErrNotFound.
+	// If the target model is already the active model, the call is idempotent: it must
+	// return the current activation record without appending a new one.
+	ActivateAuthorizationModel(ctx context.Context, store, modelID string) (*AuthorizationModelActivation, error)
+
+	// ReadAuthorizationModelActivations returns the store's activation ledger in
+	// descending order of activation ID (newest first), along with a continuation token
+	// used to fetch the next page of results.
+	ReadAuthorizationModelActivations(
+		ctx context.Context,
+		store string,
+		options ReadAuthorizationModelActivationsOptions,
+	) ([]*AuthorizationModelActivation, string, error)
 }
 
 // TypeDefinitionWriteBackend provides a write interface for managing typed definition.
@@ -409,6 +463,7 @@ type ChangelogBackend interface {
 type OpenFGADatastore interface {
 	TupleBackend
 	AuthorizationModelBackend
+	ModelActivationBackend
 	StoresBackend
 	AssertionsBackend
 	ChangelogBackend

@@ -142,7 +142,11 @@ type MemoryBackend struct {
 	// AuthorizationModelBackend
 	// map: store = > map: type definition id => type definition
 	authorizationModels map[string]map[string]*AuthorizationModelEntry // GUARDED_BY(mutexModels).
-	mutexModels         sync.RWMutex
+
+	// ModelActivationBackend
+	// map: store => append-only ledger of model activations, ordered oldest to newest.
+	modelActivations map[string][]*storage.AuthorizationModelActivation // GUARDED_BY(mutexModels).
+	mutexModels      sync.RWMutex
 
 	// map: store id => store data
 	stores      map[string]*openfgav1.Store // GUARDED_BY(mutexStores).
@@ -159,8 +163,7 @@ var _ storage.OpenFGADatastore = (*MemoryBackend)(nil)
 // AuthorizationModelEntry represents an entry in a storage system
 // that holds information about an authorization model.
 type AuthorizationModelEntry struct {
-	model  *openfgav1.AuthorizationModel
-	latest bool
+	model *openfgav1.AuthorizationModel
 }
 
 // New creates a new [MemoryBackend] given the options.
@@ -171,6 +174,7 @@ func New(opts ...StorageOption) storage.OpenFGADatastore {
 		tuples:                        make(map[string][]*storage.TupleRecord, 0),
 		changes:                       make(map[string][]*tupleChangeRec, 0),
 		authorizationModels:           make(map[string]map[string]*AuthorizationModelEntry),
+		modelActivations:              make(map[string][]*storage.AuthorizationModelActivation),
 		stores:                        make(map[string]*openfgav1.Store, 0),
 		assertions:                    make(map[string][]*openfgav1.Assertion, 0),
 	}

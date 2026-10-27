@@ -332,19 +332,19 @@ func (m *MockAuthorizationModelReadBackend) EXPECT() *MockAuthorizationModelRead
 	return m.recorder
 }
 
-// FindLatestAuthorizationModel mocks base method.
-func (m *MockAuthorizationModelReadBackend) FindLatestAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
+// FindActiveAuthorizationModel mocks base method.
+func (m *MockAuthorizationModelReadBackend) FindActiveAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindLatestAuthorizationModel", ctx, store)
+	ret := m.ctrl.Call(m, "FindActiveAuthorizationModel", ctx, store)
 	ret0, _ := ret[0].(*openfgav1.AuthorizationModel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindLatestAuthorizationModel indicates an expected call of FindLatestAuthorizationModel.
-func (mr *MockAuthorizationModelReadBackendMockRecorder) FindLatestAuthorizationModel(ctx, store any) *gomock.Call {
+// FindActiveAuthorizationModel indicates an expected call of FindActiveAuthorizationModel.
+func (mr *MockAuthorizationModelReadBackendMockRecorder) FindActiveAuthorizationModel(ctx, store any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindLatestAuthorizationModel", reflect.TypeOf((*MockAuthorizationModelReadBackend)(nil).FindLatestAuthorizationModel), ctx, store)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindActiveAuthorizationModel", reflect.TypeOf((*MockAuthorizationModelReadBackend)(nil).FindActiveAuthorizationModel), ctx, store)
 }
 
 // ReadAuthorizationModel mocks base method.
@@ -376,6 +376,61 @@ func (m *MockAuthorizationModelReadBackend) ReadAuthorizationModels(ctx context.
 func (mr *MockAuthorizationModelReadBackendMockRecorder) ReadAuthorizationModels(ctx, store, options any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadAuthorizationModels", reflect.TypeOf((*MockAuthorizationModelReadBackend)(nil).ReadAuthorizationModels), ctx, store, options)
+}
+
+// MockModelActivationBackend is a mock of ModelActivationBackend interface.
+type MockModelActivationBackend struct {
+	ctrl     *gomock.Controller
+	recorder *MockModelActivationBackendMockRecorder
+	isgomock struct{}
+}
+
+// MockModelActivationBackendMockRecorder is the mock recorder for MockModelActivationBackend.
+type MockModelActivationBackendMockRecorder struct {
+	mock *MockModelActivationBackend
+}
+
+// NewMockModelActivationBackend creates a new mock instance.
+func NewMockModelActivationBackend(ctrl *gomock.Controller) *MockModelActivationBackend {
+	mock := &MockModelActivationBackend{ctrl: ctrl}
+	mock.recorder = &MockModelActivationBackendMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockModelActivationBackend) EXPECT() *MockModelActivationBackendMockRecorder {
+	return m.recorder
+}
+
+// ActivateAuthorizationModel mocks base method.
+func (m *MockModelActivationBackend) ActivateAuthorizationModel(ctx context.Context, store, modelID string) (*storage.AuthorizationModelActivation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateAuthorizationModel", ctx, store, modelID)
+	ret0, _ := ret[0].(*storage.AuthorizationModelActivation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ActivateAuthorizationModel indicates an expected call of ActivateAuthorizationModel.
+func (mr *MockModelActivationBackendMockRecorder) ActivateAuthorizationModel(ctx, store, modelID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateAuthorizationModel", reflect.TypeOf((*MockModelActivationBackend)(nil).ActivateAuthorizationModel), ctx, store, modelID)
+}
+
+// ReadAuthorizationModelActivations mocks base method.
+func (m *MockModelActivationBackend) ReadAuthorizationModelActivations(ctx context.Context, store string, options storage.ReadAuthorizationModelActivationsOptions) ([]*storage.AuthorizationModelActivation, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReadAuthorizationModelActivations", ctx, store, options)
+	ret0, _ := ret[0].([]*storage.AuthorizationModelActivation)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ReadAuthorizationModelActivations indicates an expected call of ReadAuthorizationModelActivations.
+func (mr *MockModelActivationBackendMockRecorder) ReadAuthorizationModelActivations(ctx, store, options any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadAuthorizationModelActivations", reflect.TypeOf((*MockModelActivationBackend)(nil).ReadAuthorizationModelActivations), ctx, store, options)
 }
 
 // MockTypeDefinitionWriteBackend is a mock of TypeDefinitionWriteBackend interface.
@@ -454,19 +509,19 @@ func (m *MockAuthorizationModelBackend) EXPECT() *MockAuthorizationModelBackendM
 	return m.recorder
 }
 
-// FindLatestAuthorizationModel mocks base method.
-func (m *MockAuthorizationModelBackend) FindLatestAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
+// FindActiveAuthorizationModel mocks base method.
+func (m *MockAuthorizationModelBackend) FindActiveAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindLatestAuthorizationModel", ctx, store)
+	ret := m.ctrl.Call(m, "FindActiveAuthorizationModel", ctx, store)
 	ret0, _ := ret[0].(*openfgav1.AuthorizationModel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindLatestAuthorizationModel indicates an expected call of FindLatestAuthorizationModel.
-func (mr *MockAuthorizationModelBackendMockRecorder) FindLatestAuthorizationModel(ctx, store any) *gomock.Call {
+// FindActiveAuthorizationModel indicates an expected call of FindActiveAuthorizationModel.
+func (mr *MockAuthorizationModelBackendMockRecorder) FindActiveAuthorizationModel(ctx, store any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindLatestAuthorizationModel", reflect.TypeOf((*MockAuthorizationModelBackend)(nil).FindLatestAuthorizationModel), ctx, store)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindActiveAuthorizationModel", reflect.TypeOf((*MockAuthorizationModelBackend)(nil).FindActiveAuthorizationModel), ctx, store)
 }
 
 // MaxTypesPerAuthorizationModel mocks base method.
@@ -729,6 +784,21 @@ func (m *MockOpenFGADatastore) EXPECT() *MockOpenFGADatastoreMockRecorder {
 	return m.recorder
 }
 
+// ActivateAuthorizationModel mocks base method.
+func (m *MockOpenFGADatastore) ActivateAuthorizationModel(ctx context.Context, store, modelID string) (*storage.AuthorizationModelActivation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ActivateAuthorizationModel", ctx, store, modelID)
+	ret0, _ := ret[0].(*storage.AuthorizationModelActivation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ActivateAuthorizationModel indicates an expected call of ActivateAuthorizationModel.
+func (mr *MockOpenFGADatastoreMockRecorder) ActivateAuthorizationModel(ctx, store, modelID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ActivateAuthorizationModel", reflect.TypeOf((*MockOpenFGADatastore)(nil).ActivateAuthorizationModel), ctx, store, modelID)
+}
+
 // Close mocks base method.
 func (m *MockOpenFGADatastore) Close() {
 	m.ctrl.T.Helper()
@@ -770,19 +840,19 @@ func (mr *MockOpenFGADatastoreMockRecorder) DeleteStore(ctx, id any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteStore", reflect.TypeOf((*MockOpenFGADatastore)(nil).DeleteStore), ctx, id)
 }
 
-// FindLatestAuthorizationModel mocks base method.
-func (m *MockOpenFGADatastore) FindLatestAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
+// FindActiveAuthorizationModel mocks base method.
+func (m *MockOpenFGADatastore) FindActiveAuthorizationModel(ctx context.Context, store string) (*openfgav1.AuthorizationModel, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindLatestAuthorizationModel", ctx, store)
+	ret := m.ctrl.Call(m, "FindActiveAuthorizationModel", ctx, store)
 	ret0, _ := ret[0].(*openfgav1.AuthorizationModel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindLatestAuthorizationModel indicates an expected call of FindLatestAuthorizationModel.
-func (mr *MockOpenFGADatastoreMockRecorder) FindLatestAuthorizationModel(ctx, store any) *gomock.Call {
+// FindActiveAuthorizationModel indicates an expected call of FindActiveAuthorizationModel.
+func (mr *MockOpenFGADatastoreMockRecorder) FindActiveAuthorizationModel(ctx, store any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindLatestAuthorizationModel", reflect.TypeOf((*MockOpenFGADatastore)(nil).FindLatestAuthorizationModel), ctx, store)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindActiveAuthorizationModel", reflect.TypeOf((*MockOpenFGADatastore)(nil).FindActiveAuthorizationModel), ctx, store)
 }
 
 // GetStore mocks base method.
@@ -902,6 +972,22 @@ func (m *MockOpenFGADatastore) ReadAuthorizationModel(ctx context.Context, store
 func (mr *MockOpenFGADatastoreMockRecorder) ReadAuthorizationModel(ctx, store, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadAuthorizationModel", reflect.TypeOf((*MockOpenFGADatastore)(nil).ReadAuthorizationModel), ctx, store, id)
+}
+
+// ReadAuthorizationModelActivations mocks base method.
+func (m *MockOpenFGADatastore) ReadAuthorizationModelActivations(ctx context.Context, store string, options storage.ReadAuthorizationModelActivationsOptions) ([]*storage.AuthorizationModelActivation, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReadAuthorizationModelActivations", ctx, store, options)
+	ret0, _ := ret[0].([]*storage.AuthorizationModelActivation)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// ReadAuthorizationModelActivations indicates an expected call of ReadAuthorizationModelActivations.
+func (mr *MockOpenFGADatastoreMockRecorder) ReadAuthorizationModelActivations(ctx, store, options any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReadAuthorizationModelActivations", reflect.TypeOf((*MockOpenFGADatastore)(nil).ReadAuthorizationModelActivations), ctx, store, options)
 }
 
 // ReadAuthorizationModels mocks base method.
