@@ -29,6 +29,7 @@ import (
 	"github.com/openfga/openfga/internal/modelgraph"
 	"github.com/openfga/openfga/internal/planner"
 	"github.com/openfga/openfga/internal/shared"
+	storerecovery "github.com/openfga/openfga/internal/storerecycle"
 	"github.com/openfga/openfga/internal/telemetry"
 	"github.com/openfga/openfga/internal/throttler"
 	"github.com/openfga/openfga/internal/utils"
@@ -41,6 +42,7 @@ import (
 	serverconfig "github.com/openfga/openfga/pkg/server/config"
 	serverErrors "github.com/openfga/openfga/pkg/server/errors"
 	"github.com/openfga/openfga/pkg/storage"
+	"github.com/openfga/openfga/pkg/storage/storerecycle"
 	"github.com/openfga/openfga/pkg/storage/storagewrappers"
 	"github.com/openfga/openfga/pkg/typesystem"
 )
@@ -253,6 +255,13 @@ type Server struct {
 
 	planner *planner.Planner
 
+	// Store recycle bin / staged recovery. Opt-in: when no recycle backend is
+	// configured, storeRecovery stays nil and DeleteStore keeps its legacy
+	// behavior. The service runs over the raw (uncached) datastore.
+	storeRecycleBackend storerecycle.Backend
+	storeRecycleOpts    []storerecovery.Option
+	storeRecovery       *storerecovery.Service
+
 	requestTimeout time.Duration
 
 	sharedResourceOptions []shared.SharedDatastoreResourcesOpt
@@ -266,6 +275,26 @@ func WithDatastore(ds storage.OpenFGADatastore) OpenFGAServiceV1Option {
 	return func(s *Server) {
 		s.datastore = ds
 	}
+}
+
+// WithStoreRecycleBackend opts in to recycle-bin deletion: DeleteStore then
+// captures the store into the recycle backend and hard-purges it from the
+// datastore, instead of the legacy hide/delete behavior. The returned
+// [storerecovery.Service] is constructed on the raw (uncached) datastore and
+// is reachable through [Server.StoreRecovery]. Recovery itself has no RPC of
+// its own (protobufs live in a separate repository); callers drive it through
+// the Go service API.
+func WithStoreRecycleBackend(b storerecycle.Backend, opts ...storerecovery.Option) OpenFGAServiceV1Option {
+	return func(s *Server) {
+		s.storeRecycleBackend = b
+		s.storeRecycleOpts = opts
+	}
+}
+
+// StoreRecovery returns the staged recovery service when a recycle backend
+// was configured, and nil otherwise.
+func (s *Server) StoreRecovery() *storerecovery.Service {
+	return s.storeRecovery
 }
 
 func WithContinuationTokenSerializer(ds encoder.ContinuationTokenSerializer) OpenFGAServiceV1Option {
@@ -994,6 +1023,16 @@ func NewServerWithOpts(opts ...OpenFGAServiceV1Option) (*Server, error) {
 	}
 
 	// below this point, don't throw errors or we may leak resources in tests
+
+	// Build the recycle service over the raw datastore, before the context
+	// and cache wrappers: recovery is bulk administrative data movement that
+	// must not read through a stale model cache, and the optional
+	// StorePurger/StoreInstaller capabilities are not promoted through
+	// wrappers.
+	if s.storeRecycleBackend != nil {
+		recoveryOpts := append([]storerecovery.Option{storerecovery.WithLogger(s.logger)}, s.storeRecycleOpts...)
+		s.storeRecovery = storerecovery.New(s.datastore, s.storeRecycleBackend, recoveryOpts...)
+	}
 
 	if !s.contextPropagationToDatastore {
 		// Creates a new [storagewrappers.ContextTracerWrapper] that will execute datastore queries using

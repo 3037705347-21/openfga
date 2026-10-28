@@ -17,6 +17,7 @@ import (
 	httpmiddleware "github.com/openfga/openfga/pkg/middleware/http"
 	"github.com/openfga/openfga/pkg/middleware/validator"
 	"github.com/openfga/openfga/pkg/server/commands"
+	serverErrors "github.com/openfga/openfga/pkg/server/errors"
 )
 
 func (s *Server) CreateStore(ctx context.Context, req *openfgav1.CreateStoreRequest) (*openfgav1.CreateStoreResponse, error) {
@@ -70,6 +71,17 @@ func (s *Server) DeleteStore(ctx context.Context, req *openfgav1.DeleteStoreRequ
 	err := s.checkAuthz(ctx, req.GetStoreId(), apimethod.DeleteStore)
 	if err != nil {
 		return nil, err
+	}
+
+	if s.storeRecovery != nil {
+		// Recycle-bin deletion: capture into the recycle backend and hard-purge
+		// the live data. A missing store is still a successful no-op, matching
+		// the legacy command semantics.
+		if err := s.storeRecovery.Recycle(ctx, req.GetStoreId()); err != nil {
+			return nil, serverErrors.HandleError("Error recycling store", err)
+		}
+		s.transport.SetHeader(ctx, httpmiddleware.XHttpCode, strconv.Itoa(http.StatusNoContent))
+		return &openfgav1.DeleteStoreResponse{}, nil
 	}
 
 	cmd := commands.NewDeleteStoreCommand(s.datastore, commands.WithDeleteStoreCmdLogger(s.logger))
